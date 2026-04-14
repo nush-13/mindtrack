@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  age           Int?
+  phoneNumber   String?
+  journalPin    String?
+  accounts      Account[]
+  sessions      Session[]
+  moods         Mood[]
+  journals      JournalEntry[]
+  habits        Habit[]
+  therapyAssessments TherapyAssessment[]
+  therapyJourneys TherapyJourney[]
+  achievements  Achievement[]
+  xp            Int       @default(0)
+  level         Int       @default(1)
+  meditationSessions MeditationSession[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Mood {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mood          String
+  intensity     Int
+  note          String?
+  sentimentScore Int?
+  date          DateTime @default(now())
+}
+
+model JournalEntry {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String?
+  content       String
+  sentimentScore Int?
+  date          DateTime @default(now())
+}
+
+model Habit {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  streak        Int      @default(0)
+  completedToday Boolean @default(false)
+  lastCompleted DateTime?
+  createdAt     DateTime @default(now())
+}
+
+model TherapyAssessment {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category      String   @default("General") // "Anxiety", "Depression", "OCD", etc.
+  score         Int
+  severity      String
+  answers       String   // JSON stringified answers
+  date          DateTime @default(now())
+}
+
+model TherapyJourney {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category      String   // e.g., "Anxiety", "Depression"
+  currentDay    Int      @default(1)
+  status        String   @default("In Progress") // "In Progress", "Completed"
+  lastInteraction DateTime @default(now())
+
+  @@unique([userId, category])
+}
+
+
+
+model Achievement {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId       String   
+  earnedAt      DateTime @default(now())
+}
+
+model MeditationSession {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  durationMinutes Int
+  completedAt   DateTime @default(now())
+}

@@ -1,0 +1,64 @@
+MINDTRACK - PROJECT REPORT
+==========================
+
+1. EXECUTIVE SUMMARY
+MindTrack is a comprehensive mental health and wellness platform designed to help users track their emotional well-being, build habits, and engage in therapeutic education. It utilizes AI-driven insights to provide a personalized experience for mood analysis and habit formation.
+
+2. TECHNOLOGY STACK
+- Framework: Next.js 14.2.3 (App Router Architecture)
+- Language: TypeScript (Strict Type Safety)
+- Runtime: Node.js
+- Styling: Tailwind CSS (Modern Glassmorphic UI)
+- Database: SQLite (via Prisma ORM 5.14)
+- Authentication: NextAuth.js (Session & JWT based)
+- AI Engine: Google Gemini API (@google/generative-ai)
+- Data Visualization: Chart.js & react-chartjs-2
+- Icons: Lucide-React
+- Security: Bcrypt (Password Hashing)
+- Analytics: Sentiment (NPM library for emotional analysis)
+
+3. DATABASE ARCHITECTURE & RELATIONSHIPS
+The system uses a relational model managed by Prisma. The primary entity is the 'User'.
+
+Core Models:
+- User: Central entity containing profile data, authentication credentials, and gamification stats (XP, Level).
+- Account/Session: NextAuth internal models for managing multi-provider login or JWT sessions.
+- VerificationToken: Used for email/password verification flows.
+
+One-to-Many (1:N) Relationships:
+- User -> Mood: Stores historical mood logs with intensity and sentiment scores.
+- User -> JournalEntry: Secure personal journal entries with AI-summarized themes.
+- User -> Habit: Tracks daily routines, streaks, and completion status.
+- User -> TherapyAssessment: Records clinical assessment scores (Anxiety, Depression, etc.) and calculated severity levels.
+- User -> TherapyJourney: Progress tracking for multi-day therapeutic education modules.
+- User -> Achievement: Badges and rewards unlocked by the user through platform activity.
+- User -> MeditationSession: Log of mindfulness minutes completed.
+
+4. FRONTEND ARCHITECTURE
+The frontend is built on the Next.js App Router, prioritizing server-side rendering where possible while using client-side interactivity for immersive features.
+
+- Root Layout: Configures global fonts (Inter and Playfair Display) and manages the layout container.
+- Providers Layer: Wraps the application in SessionProvider (Auth) and GamificationProvider (Global XP state).
+- UI Design: Implements a premium, modern aesthetic using "Glassmorphism" (backdrop-blur, frosted glass effects, and vibrant gradients).
+- Modular Components: Reusable logic like 'BreatheAnimation', 'MoodChart', and 'InteractiveExercise' are decoupled from pages.
+- Content Configuration: 'lib/therapyContent.ts' acts as a static CMS, defining all therapy curriculum, quiz data, and video resources.
+
+5. BACKEND ARCHITECTURE & LOGIC
+The backend consists of highly modular API routes located in 'app/api/'.
+
+- Authentication: '/api/auth' and '/api/register' handle secure onboarding using Prisma profile adapters.
+- AI Microservices: '/api/ai' endpoints integrate with Google Gemini (gemini-1.5-pro, gemini-2.0-flash) to provide:
+    - Personalized journaling prompts based on recent entries.
+    - Reflective insights for therapy module completions.
+    - Summarization and expansion of user reflections.
+- Activity & Analytics: '/api/user/analytics' and '/api/moods' perform server-side aggregation for trend mapping.
+- Data Integration: API routes utilize Prisma Client for efficient database queries and mutations.
+
+6. FILE RELATIONSHIPS & SYSTEM FLOW
+- Shared Layout: 'app/layout.tsx' -> 'components/Providers' -> 'app/page.tsx' (Dashboard).
+- Global State: Components utilize the 'useGamification' hook to update user levels in real-time without page reloads.
+- Database Access: 'lib/prisma.ts' exports the Prisma singleton instance used by all server components and API routes.
+- Component-Page Interaction: Pages in 'app/' aggregate complex components from 'components/' and pass down configuration data from 'lib/'.
+
+7. DEPLOYMENT & SCALABILITY
+The application is Dockerized ('Dockerfile' included) for consistent deployment environments and uses SQLite for local development, which can be easily migrated to PostgreSQL for production scaling via Prisma providers.
